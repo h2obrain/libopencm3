@@ -29,6 +29,25 @@
  * according to the selected cores base address. */
 #define dev_base_address (usbd_dev->driver->base_address)
 #define REBASE(x)        MMIO32((x) + (dev_base_address))
+#define REBASE_FIFO(x)   (&MMIO32((dev_base_address) + (OTG_FIFO(x))))
+
+#define ASSUME_64B_MAXPACKETSIZE
+// 0=FS 1=HS
+#ifndef USB_OTG_DRIVER
+#define USB_OTG_DRIVER 1
+#endif
+//#if !defined(USB_OTG_DRIVER)
+//	#define USB_OTG_DRIVER ((dev_base_address==USB_OTG_FS_BASE)?0:1)
+//#endif
+
+#if defined(ASSUME_64B_MAXPACKETSIZE)
+#define EPx_WMAXPACKETSIZE(epX) 64
+#else
+#define USBDRV_CURRENT_CONFIG   (0) // ??? usbd_dev->current_config-1
+#define USBDRV_CONFIG           (usbd_dev->config[USBDRV_CURRENT_CONFIG])
+#define USBDRV_ALTSETTING       (USBDRV_CONFIG.interface->altsetting[*USBDRV_CONFIG.interface->cur_altsetting])
+#define EPx_WMAXPACKETSIZE(epX) (USBDRV_ALTSETTING.endpoint[epX].wMaxPacketSize)
+#endif
 
 void dwc_set_address(usbd_device *usbd_dev, uint8_t addr)
 {
@@ -43,9 +62,25 @@ void dwc_ep_setup(usbd_device *usbd_dev, uint8_t addr, uint8_t type,
 	 * Configure endpoint address and type. Allocate FIFO memory for
 	 * endpoint. Install callback function.
 	 */
-	uint8_t dir = addr & 0x80;
+	uint16_t fifo_word_len;
+	uint8_t dir;
+
+	uint16_t wMaxPacketSize;
+
+	dir = addr & 0x80;
 	addr &= 0x7f;
 
+	wMaxPacketSize = EPx_WMAXPACKETSIZE(addr);
+
+	// according to reference manual
+	//fifo_word_len = max_size/4+1;
+	fifo_word_len = (max_size+(4-1))/4; // +1; // +1 for 1 word spacing between endpoints?
+	// at the moment max_size<=7*64 (<8*64?)
+
+	/* minimum fifo size is 16 words */
+	if (fifo_word_len < 16) {
+		fifo_word_len = 16;
+	}
 	if (addr == 0) { /* For the default control endpoint */
 		/* Configure IN part. */
 		if (max_size >= 64) {
@@ -65,31 +100,41 @@ void dwc_ep_setup(usbd_device *usbd_dev, uint8_t addr, uint8_t type,
 
 		/* Configure OUT part. */
 		usbd_dev->doeptsiz[0] = OTG_DIEPSIZ0_STUPCNT_1 |
-			OTG_DIEPSIZ0_PKTCNT |
+			OTG_DIEPSIZ_PKTCNT_1 |
 			(max_size & OTG_DIEPSIZ0_XFRSIZ_MASK);
 		REBASE(OTG_DOEPTSIZ(0)) = usbd_dev->doeptsiz[0];
 		REBASE(OTG_DOEPCTL(0)) |=
 		    OTG_DOEPCTL0_EPENA | OTG_DIEPCTL0_SNAK;
 
-		REBASE(OTG_GNPTXFSIZ) = ((max_size / 4) << 16) |
+		REBASE(OTG_GNPTXFSIZ) = ((uint32_t)fifo_word_len << 16) |
 					 usbd_dev->driver->rx_fifo_size;
-		usbd_dev->fifo_mem_top += max_size / 4;
+		usbd_dev->fifo_mem_top += fifo_word_len;
 		usbd_dev->fifo_mem_top_ep0 = usbd_dev->fifo_mem_top;
 
 		return;
 	}
 
 	if (dir) {
-		REBASE(OTG_DIEPTXF(addr)) = ((max_size / 4) << 16) |
+		REBASE(OTG_DIEPTXF(addr)) = ((uint32_t)fifo_word_len << 16) |
 					     usbd_dev->fifo_mem_top;
-		usbd_dev->fifo_mem_top += max_size / 4;
+		usbd_dev->fifo_mem_top += fifo_word_len;
 
-		REBASE(OTG_DIEPTSIZ(addr)) =
-		    (max_size & OTG_DIEPSIZ0_XFRSIZ_MASK);
+		/*  officially (reference manual rev. 8 page 1449) there are only 4
+		 *  of those registers for otg-hs.. (i'm using 6 and it's working)
+		 */
+		REBASE(OTG_DIEPTSIZ(addr)) = 0;
+				//(max_size & OTG_FS_DIEPSIZ0_XFRSIZ_MASK);
+		/*
+		 * setting the commented flag results in the
+		 * multiple packets send not working
+		 * => usb.core.USBError: [Errno 75] Overflow
+		 */
 		REBASE(OTG_DIEPCTL(addr)) |=
-		    OTG_DIEPCTL0_EPENA | OTG_DIEPCTL0_SNAK | (type << 18)
+		    /*OTG_DIEPCTL0_EPENA |*/ OTG_DIEPCTL0_SNAK | (type << 18)
 		    | OTG_DIEPCTL0_USBAEP | OTG_DIEPCTLX_SD0PID
-		    | (addr << 22) | max_size;
+		    | (addr << 22) | ((max_size > wMaxPacketSize) ?
+					wMaxPacketSize : max_size
+			  );
 
 		if (callback) {
 			usbd_dev->user_callback_ctr[addr][USB_TRANSACTION_IN] =
@@ -98,12 +143,15 @@ void dwc_ep_setup(usbd_device *usbd_dev, uint8_t addr, uint8_t type,
 	}
 
 	if (!dir) {
-		usbd_dev->doeptsiz[addr] = OTG_DIEPSIZ0_PKTCNT |
+		usbd_dev->doeptsiz[addr] = OTG_DIEPSIZ_PKTCNT_1 |
 				 (max_size & OTG_DIEPSIZ0_XFRSIZ_MASK);
 		REBASE(OTG_DOEPTSIZ(addr)) = usbd_dev->doeptsiz[addr];
 		REBASE(OTG_DOEPCTL(addr)) |= OTG_DOEPCTL0_EPENA |
 		    OTG_DOEPCTL0_USBAEP | OTG_DIEPCTL0_CNAK |
-		    OTG_DOEPCTLX_SD0PID | (type << 18) | max_size;
+		    OTG_DOEPCTLX_SD0PID | (type << 18) |
+			((max_size > wMaxPacketSize) ?
+				wMaxPacketSize : max_size
+			);
 
 		if (callback) {
 			usbd_dev->user_callback_ctr[addr][USB_TRANSACTION_OUT] =
@@ -119,7 +167,7 @@ void dwc_endpoints_reset(usbd_device *usbd_dev)
 	usbd_dev->fifo_mem_top = usbd_dev->fifo_mem_top_ep0;
 
 	/* Disable any currently active endpoints */
-	for (i = 1; i < 4; i++) {
+	for (i = 1; i < 4+(USB_OTG_DRIVER<<1); i++) {
 		if (REBASE(OTG_DOEPCTL(i)) & OTG_DOEPCTL0_EPENA) {
 			REBASE(OTG_DOEPCTL(i)) |= OTG_DOEPCTL0_EPDIS;
 		}
@@ -194,6 +242,7 @@ uint16_t dwc_ep_write_packet(usbd_device *usbd_dev, uint8_t addr,
 			      const void *buf, uint16_t len)
 {
 	const uint32_t *buf32 = buf;
+	uint16_t wMaxPacketSize;
 #if defined(__ARM_ARCH_6M__)
 	const uint8_t *buf8 = buf;
 	uint32_t word32;
@@ -203,12 +252,23 @@ uint16_t dwc_ep_write_packet(usbd_device *usbd_dev, uint8_t addr,
 	addr &= 0x7F;
 
 	/* Return if endpoint is already enabled. */
-	if (REBASE(OTG_DIEPTSIZ(addr)) & OTG_DIEPSIZ0_PKTCNT) {
+	if (REBASE(OTG_DIEPTSIZ(addr)) & OTG_HS_DIEPSIZX_PKTMSK) {
 		return 0;
 	}
 
 	/* Enable endpoint for transmission. */
-	REBASE(OTG_DIEPTSIZ(addr)) = OTG_DIEPSIZ0_PKTCNT | len;
+	if (!len) {
+		REBASE(OTG_DIEPTSIZ(addr)) = OTG_DIEPSIZ_PKTCNT_1;
+	} else {
+		wMaxPacketSize = EPx_WMAXPACKETSIZE(addr);
+		/* Needed for for interrupt eps
+		 *  num_pkgs_per_frame<<30 | */
+		REBASE(OTG_DIEPTSIZ(addr)) = len |
+			(((uint32_t)(
+				(len+wMaxPacketSize-1)/wMaxPacketSize
+			))<<19);
+
+	}
 	REBASE(OTG_DIEPCTL(addr)) |= OTG_DIEPCTL0_EPENA |
 				     OTG_DIEPCTL0_CNAK;
 
@@ -339,7 +399,11 @@ void dwc_poll(usbd_device *usbd_dev)
 	 * There is no global interrupt flag for transmit complete.
 	 * The XFRC bit must be checked in each OTG_DIEPINT(x).
 	 */
-	for (i = 0; i < 4; i++) { /* Iterate over endpoints. */
+	for (i = 0; i < 4+(USB_OTG_DRIVER<<1); i++) { /* Iterate over endpoints.
+					There are actually 8 DIEPINT registers,
+					but only 6 FIFO buffers in OTG_HS
+					OTG_FS has only 4 DIEPINT registers */
+//	for (i = 0; i < 4; i++) { /* Iterate over endpoints. */
 		if (REBASE(OTG_DIEPINT(i)) & OTG_DIEPINTX_XFRC) {
 			/* Transfer complete. */
 			if (usbd_dev->user_callback_ctr[i]
@@ -385,14 +449,14 @@ void dwc_poll(usbd_device *usbd_dev)
 		}
 
 		if (type == USB_TRANSACTION_SETUP
-			&& (REBASE(OTG_DIEPTSIZ(ep)) & OTG_DIEPSIZ0_PKTCNT)) {
+			&& (REBASE(OTG_DIEPTSIZ(ep)) & OTG_DIEPSIZ_PKTCNT_1)) {
 			/* SETUP received but there is still something stuck
 			 * in the transmit fifo.  Flush it.
 			 */
 			dwc_flush_txfifo(usbd_dev, ep);
 		}
 
-		/* Save packet size for dwc_ep_read_packet(). */
+		/* Save packet size for stm32f107_ep_read_packet(). */
 		usbd_dev->rxbcnt = (rxstsp & OTG_GRXSTSP_BCNT_MASK) >> 4;
 
 		if (type == USB_TRANSACTION_SETUP) {
@@ -431,10 +495,23 @@ void dwc_poll(usbd_device *usbd_dev)
 		REBASE(OTG_GINTSTS) = OTG_GINTSTS_SOF;
 	}
 
+	/* enable/disable SOF-callback on-the-fly */
 	if (usbd_dev->user_callback_sof) {
 		REBASE(OTG_GINTMSK) |= OTG_GINTMSK_SOFM;
 	} else {
 		REBASE(OTG_GINTMSK) &= ~OTG_GINTMSK_SOFM;
+	}
+
+	/* handle otg session end detect */
+	if (intsts & OTG_GINTSTS_OTGINT) {
+		uint32_t gotgints = REBASE(OTG_GOTGINT);
+		//REBASE(OTG_GINTSTS) = intsts;
+		REBASE(OTG_GOTGINT) = gotgints;
+		if (gotgints & OTG_GOTGINT_SEDET) {
+			/* Handle USB Session end detected (Vbus < 0.8V) */
+			_usbd_reset(usbd_dev);
+			return;
+		}
 	}
 }
 

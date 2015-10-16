@@ -213,7 +213,8 @@ static void usb_control_setup_write(usbd_device *usbd_dev,
 		usbd_dev->control_state.state = LAST_DATA_OUT;
 	}
 
-	usbd_ep_nak_set(usbd_dev, 0, 0);
+	// causes word loss and libusb crashes
+	//usbd_ep_nak_set(usbd_dev, 0, 0);
 }
 
 /* Do not appear to belong to the API, so are omitted from docs */
@@ -226,7 +227,8 @@ void _usbd_control_setup(usbd_device *usbd_dev, uint8_t ea)
 
 	usbd_dev->control_state.complete = NULL;
 
-	usbd_ep_nak_set(usbd_dev, 0, 1);
+	// causes word loss and libusb crashes
+	//usbd_ep_nak_set(usbd_dev, 0, 1);
 
 	if (req->wLength == 0) {
 		usb_control_setup_read(usbd_dev, req);
