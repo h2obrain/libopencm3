@@ -66,8 +66,8 @@ static usbd_device *stm32f207_usbd_init(void)
 	OTG_HS_GRSTCTL |= OTG_GRSTCTL_CSRST;
 	while (OTG_HS_GRSTCTL & OTG_GRSTCTL_CSRST);
 
-	/* Force peripheral only mode. */
-	OTG_HS_GUSBCFG |= OTG_GUSBCFG_FDMOD | OTG_GUSBCFG_TRDT_MASK;
+	/* Force peripheral only mode and set turnaround time to maximum */
+	OTG_HS_GUSBCFG |= OTG_GUSBCFG_FDMOD | OTG_GUSBCFG_TRDT_MASK; // | (0x5<<10);
 
 	/* Full speed device. */
 	OTG_HS_DCFG |= OTG_DCFG_DSPD;
@@ -80,12 +80,14 @@ static usbd_device *stm32f207_usbd_init(void)
 
 	/* Unmask interrupts for TX and RX. */
 	OTG_HS_GAHBCFG |= OTG_GAHBCFG_GINT;
-	OTG_HS_GINTMSK = OTG_GINTMSK_ENUMDNEM |
+	OTG_HS_GINTMSK =
+			 OTG_GINTMSK_ENUMDNEM |
 			 OTG_GINTMSK_RXFLVLM |
 			 OTG_GINTMSK_IEPINT |
 			 OTG_GINTMSK_USBSUSPM |
-			 OTG_GINTMSK_WUIM;
-	OTG_HS_DAINTMSK = 0xF;
+			 OTG_GINTMSK_WUIM |
+			 OTG_GINTMSK_OTGINT;
+	OTG_HS_DAINTMSK = 0xFFFF;
 	OTG_HS_DIEPMSK = OTG_DIEPMSK_XFRCM;
 
 	return &usbd_dev;

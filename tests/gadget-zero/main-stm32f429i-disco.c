@@ -33,6 +33,21 @@
 	do { } while (0)
 #endif
 
+
+//#define USE_USB_INTERRUPT
+
+static usbd_device *usbd_dev;
+
+#ifdef USE_USB_INTERRUPT
+
+void otg_hs_isr(void)
+{
+	usbd_poll(usbd_dev);
+}
+
+#endif
+
+
 int main(void)
 {
 	rcc_clock_setup_pll(&rcc_hse_8mhz_3v3[RCC_CLOCK_3V3_168MHZ]);
@@ -48,12 +63,18 @@ int main(void)
 	gpio_mode_setup(GPIOD, GPIO_MODE_OUTPUT,
 			GPIO_PUPD_NONE, GPIO12 | GPIO13 | GPIO14 | GPIO15);
 
-	usbd_device *usbd_dev = gadget0_init(&otghs_usb_driver, "stm32f429i-disco");
+	usbd_dev = gadget0_init(&otghs_usb_driver, "stm32f429i-disco");
 
 	ER_DPRINTF("bootup complete\n");
+	
+#ifndef USE_USB_INTERRUPT
 	while (1) {
-		gadget0_run(usbd_dev);
+		usbd_poll(usbd_dev);
 	}
-
+#else
+	nvic_enable_irq(NVIC_OTG_HS_IRQ);
+	
+	while (1);
+#endif
 }
 

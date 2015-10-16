@@ -31,6 +31,9 @@ INCLUDES += $(patsubst %,-I%, . $(SHARED_DIR))
 
 OPENCM3_DIR=../..
 
+OPT  = -O3 -g # -flto
+CSTD = -std=gnu11
+
 ### This section can go to an arch shared rules eventually...
 LDSCRIPT = ../../lib/stm32/f4/stm32f405x6.ld
 OPENCM3_LIB = opencm3_stm32f4
