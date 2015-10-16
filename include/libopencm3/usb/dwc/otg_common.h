@@ -352,7 +352,10 @@
 #define OTG_DIEPSIZ0_STUPCNT_3		(0x3 << 29)
 #define OTG_DIEPSIZ0_STUPCNT_MASK	(0x3 << 29)
 /* Bits 28:20 - Reserved */
-#define OTG_DIEPSIZ0_PKTCNT		(1 << 19)
+#define OTG_DIEPSIZ_PKTCNT_1		(1 << 19)
+#define OTG_DIEPSIZ0_PKTMSK		(0x3 << 19)
+#define OTG_FS_DIEPSIZX_PKTMSK		(0x3 << 19)
+#define OTG_HS_DIEPSIZX_PKTMSK		(0x3ff << 19)
 /* Bits 18:7 - Reserved */
 #define OTG_DIEPSIZ0_XFRSIZ_MASK	(0x7f << 0)
 

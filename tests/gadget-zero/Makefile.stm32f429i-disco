@@ -31,6 +31,9 @@ INCLUDES += $(patsubst %,-I%, . $(SHARED_DIR))
 
 OPENCM3_DIR=../..
 
+OPT  = -O3 -g # -flto
+CSTD = -std=gnu11
+
 ### This section can go to an arch shared rules eventually...
 DEVICE=stm32f405re
 OOCD_FILE = openocd.$(BOARD).cfg

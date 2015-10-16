@@ -35,10 +35,10 @@
 #ifdef ER_DEBUG
 #include <stdio.h>
 #define ER_DPRINTF(fmt, ...) \
-	do { printf(fmt, ## __VA_ARGS__); } while (0)
+    do { printf(fmt, ## __VA_ARGS__); } while (0)
 #else
 #define ER_DPRINTF(fmt, ...) \
-	do { } while (0)
+    do { } while (0)
 #endif
 
 /*
@@ -48,6 +48,9 @@
 #define GZ_REQ_PRODUCE		2
 #define GZ_REQ_SET_ALIGNED	3
 #define GZ_REQ_SET_UNALIGNED	4
+#define GZ_REQ_WRITE_LOOPBACK_BUFFER	10
+#define GZ_REQ_READ_LOOPBACK_BUFFER	11
+
 #define INTEL_COMPLIANCE_WRITE 0x5b
 #define INTEL_COMPLIANCE_READ 0x5c
 
@@ -133,7 +136,7 @@ static const struct usb_interface_descriptor iface_loopback[] = {
 		.bDescriptorType = USB_DT_INTERFACE,
 		.bInterfaceNumber = 0, /* still 0, as it's a different config...? */
 		.bAlternateSetting = 0,
-		.bNumEndpoints = 4,
+		.bNumEndpoints = 2,
 		.bInterfaceClass = USB_CLASS_VENDOR,
 		.iInterface = 0,
 		.endpoint = endp_bulk,
@@ -280,6 +283,7 @@ static enum usbd_request_return_codes gadget0_control_request(usbd_device *usbd_
 	(void) usbd_dev;
 	(void) complete;
 	(void) buf;
+	static uint8_t loopback_buffer[sizeof(usbd_control_buffer)];
 	ER_DPRINTF("ctrl breq: %x, bmRT: %x, windex :%x, wlen: %x, wval :%x\n",
 		req->bRequest, req->bmRequestType, req->wIndex, req->wLength,
 		req->wValue);
@@ -336,6 +340,37 @@ static enum usbd_request_return_codes gadget0_control_request(usbd_device *usbd_
 		} else {
 			*len = req->wValue;
 		}
+		return USBD_REQ_HANDLED;
+	case GZ_REQ_WRITE_LOOPBACK_BUFFER:
+		if (req->wValue > sizeof(usbd_control_buffer)) {
+			ER_DPRINTF("Can't store more than out control buffer! %d > %d\n",
+				req->wValue, sizeof(usbd_control_buffer));
+			return USBD_REQ_NOTSUPP;
+		}
+		/* Don't store more than asked for! */
+		if (req->wValue > req->wLength) {
+			memcpy(loopback_buffer, *buf, req->wLength);
+			ER_DPRINTF("Truncated stored loopback data to match wLen\n");
+		} else {
+			memcpy(loopback_buffer, *buf, req->wValue);
+		}
+		ER_DPRINTF("Stored loopback data of %d\n", req->wValue);
+		return USBD_REQ_HANDLED;
+	case GZ_REQ_READ_LOOPBACK_BUFFER:
+		ER_DPRINTF("loopback of %d\n", req->wValue);
+		if (req->wValue > sizeof(usbd_control_buffer)) {
+			ER_DPRINTF("Can't write more than out control buffer! %d > %d\n",
+				req->wValue, sizeof(usbd_control_buffer));
+			return USBD_REQ_NOTSUPP;
+		}
+		/* Don't produce more than asked for! */
+		if (req->wValue > req->wLength) {
+			ER_DPRINTF("Truncating reply to match wLen\n");
+			*len = req->wLength;
+		} else {
+			*len = req->wValue;
+		}
+		memcpy(*buf,loopback_buffer,*len);
 		return USBD_REQ_HANDLED;
 	default:
 		ER_DPRINTF("Unhandled request!\n");
