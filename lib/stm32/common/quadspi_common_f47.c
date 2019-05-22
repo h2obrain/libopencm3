@@ -1,7 +1,13 @@
-/** @defgroup quadspi_defines Quad-SPI Defines
- * @brief <b>Defined Constants and Types for the STM32F4xx Quad-SPI
- *           interface</b>
- * @ingroup STM32F4xx_defines
+/** @defgroup quadspi_file Quad-SPI peripheral API
+ *
+ * @ingroup peripheral_apis
+ *
+ * @version 1.0.0
+ *
+ * This library supports the Quad-SPI interface (QUADSPI) in the STM32F4xx
+ * and STM32F7xx series of ARM Cortex Microcontrollers by ST Microelectronics.
+ *
+ * LGPL License Terms @ref lgpl_license
  */
 /*
  * This file is part of the libopencm3 project.
@@ -18,10 +24,10 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
-/**@{*/
 
 #include <libopencm3/stm32/common/quadspi_common_f47.h>
+
+/**@{*/
 
 /**@}*/

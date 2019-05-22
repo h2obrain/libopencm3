@@ -1,7 +1,7 @@
 /** @defgroup quadspi_defines Quad-SPI Defines
- * @brief <b>Defined Constants and Types for the STM32F4xx Quad-SPI
+ * @brief <b>Defined Constants and Types for the STM32F7xx Quad-SPI
  *           interface</b>
- * @ingroup STM32F4xx_defines
+ * @ingroup STM32F7xx_defines
  */
 /*
  * This file is part of the libopencm3 project.
@@ -21,6 +21,8 @@
  *
  */
 /**@{*/
+
+#define QUADSPI_BASE QSPIC_BASE
 
 #include <libopencm3/stm32/common/quadspi_common_f47.h>
 
