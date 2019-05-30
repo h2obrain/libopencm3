@@ -31,4 +31,15 @@ LGPL License Terms @ref lgpl_license
 
 #include <libopencm3/stm32/common/dma_common_f24.h>
 
+/* CHSEL[25:27]: Channel Select */
+/** @addtogroup dma_ch_sel DMA Channel Select
+
+@{*/
+#define DMA_SxCR_CHSEL_8		(8 << DMA_SxCR_CHSEL_SHIFT)
+#define DMA_SxCR_CHSEL_9		(9 << DMA_SxCR_CHSEL_SHIFT)
+#define DMA_SxCR_CHSEL_10		(10 << DMA_SxCR_CHSEL_SHIFT)
+#define DMA_SxCR_CHSEL_11		(11 << DMA_SxCR_CHSEL_SHIFT)
+/**@}*/
+
+
 #endif
