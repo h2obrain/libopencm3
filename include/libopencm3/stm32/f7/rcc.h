@@ -269,6 +269,7 @@
 #define RCC_AHB2RSTR_RNGRST			(1 << 6)
 #define RCC_AHB2RSTR_HASHRST			(1 << 5)
 #define RCC_AHB2RSTR_CRYPRST			(1 << 4)
+#define RCC_AHB2RSTR_JPEGRST			(1 << 1)
 #define RCC_AHB2RSTR_DCMIRST			(1 << 0)
 /**@}*/
 
@@ -371,6 +372,7 @@
 #define RCC_AHB2ENR_RNGEN			(1 << 6)
 #define RCC_AHB2ENR_HASHEN			(1 << 5)
 #define RCC_AHB2ENR_CRYPEN			(1 << 4)
+#define RCC_AHB2ENR_JPEGEN			(1 << 1)
 #define RCC_AHB2ENR_DCMIEN			(1 << 0)
 /**@}*/
 
@@ -476,6 +478,7 @@
 #define RCC_AHB2LPENR_RNGLPEN			(1 << 6)
 #define RCC_AHB2LPENR_HASHLPEN			(1 << 5)
 #define RCC_AHB2LPENR_CRYPLPEN			(1 << 4)
+#define RCC_AHB2LPENR_JPEGLPEN			(1 << 1)
 #define RCC_AHB2LPENR_DCMILPEN			(1 << 0)
 
 /* --- RCC_AHB3LPENR values ------------------------------------------------- */
@@ -746,6 +749,7 @@ enum rcc_periph_clken {
 
 	/* AHB2 peripherals */
 	RCC_DCMI	= _REG_BIT(0x34, 0),
+	RCC_JPEG	= _REG_BIT(0x34, 1),
 	RCC_CRYP	= _REG_BIT(0x34, 4),
 	RCC_HASH	= _REG_BIT(0x34, 5),
 	RCC_RNG		= _REG_BIT(0x34, 6),
@@ -845,6 +849,7 @@ enum rcc_periph_clken {
 
 	/* AHB2 peripherals */
 	SCC_DCMI	= _REG_BIT(0x54, 0),
+	SCC_JPEG	= _REG_BIT(0x54, 1),
 	SCC_CRYP	= _REG_BIT(0x54, 4),
 	SCC_HASH	= _REG_BIT(0x54, 5),
 	SCC_RNG		= _REG_BIT(0x54, 6),
@@ -932,6 +937,7 @@ enum rcc_periph_rst {
 
 	/* AHB2 peripherals */
 	RST_DCMI	= _REG_BIT(0x14, 0),
+	RST_JPEG	= _REG_BIT(0x14, 1),
 	RST_CRYP	= _REG_BIT(0x14, 4),
 	RST_HASH	= _REG_BIT(0x14, 5),
 	RST_RNG		= _REG_BIT(0x14, 6),
