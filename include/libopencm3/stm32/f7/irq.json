@@ -103,7 +103,13 @@
         "dfsdm1_flt1",
         "dfsdm1_flt2",
         "dfsdm1_flt3",
-        "sdmmc2"
+        "sdmmc2",
+        "can3_tx",
+        "can3_rx0",
+        "can3_rx1",
+        "can3_sce",
+        "jpeg",
+        "mdios"
     ],
     "partname_humanreadable": "STM32 F7 series",
     "partname_doxygen": "STM32F7",
