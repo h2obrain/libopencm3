@@ -31,4 +31,4 @@ LGPL License Terms @ref lgpl_license
  */
 
 #pragma once
-#include <libopencm3/stm32/common/timer_common_all.h>
+#include <libopencm3/stm32/common/timer_common_f24.h>
