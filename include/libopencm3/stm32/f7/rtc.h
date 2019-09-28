@@ -1,12 +1,12 @@
 /** @defgroup rtc_defines RTC Defines
 
-@brief <b>Defined Constants and Types for the STM32F4xx RTC</b>
+@brief <b>Defined Constants and Types for the STM32F7xx RTC</b>
 
-@ingroup STM32F4xx_defines
+@ingroup STM32F7xx_defines
 
 @version 1.0.0
 
-@date 5 December 2012
+@date 28 September 2019
 
 LGPL License Terms @ref lgpl_license
  */
@@ -32,5 +32,7 @@ LGPL License Terms @ref lgpl_license
 #define LIBOPENCM3_RTC_H
 
 #include <libopencm3/stm32/common/rtc_common_f47.h>
+
+/* TODO add missing definitions */
 
 #endif

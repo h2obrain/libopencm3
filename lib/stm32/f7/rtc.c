@@ -1,14 +1,14 @@
-/** @defgroup rtc_defines RTC Defines
-
-@brief <b>Defined Constants and Types for the STM32F4xx RTC</b>
-
-@ingroup STM32F4xx_defines
-
-@version 1.0.0
-
-@date 5 December 2012
-
-LGPL License Terms @ref lgpl_license
+/** @defgroup rtc_file RTC peripheral API
+ *
+ * @ingroup peripheral_apis
+ *
+ * @brief <b>libopencm3 STM32F7xx RTC</b>
+ *
+ * @version 1.0.0
+ *
+ * @date 28 September 2019
+ *
+ * LGPL License Terms @ref lgpl_license
  */
 
 /*
@@ -28,9 +28,12 @@ LGPL License Terms @ref lgpl_license
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBOPENCM3_RTC_H
-#define LIBOPENCM3_RTC_H
+#include <libopencm3/stm32/exti.h>
+#include <libopencm3/cm3/nvic.h>
+#include <libopencm3/stm32/rtc.h>
 
-#include <libopencm3/stm32/common/rtc_common_f47.h>
+/**@{*/
 
-#endif
+
+
+/**@}*/
