@@ -251,10 +251,10 @@ LGPL License Terms @ref lgpl_license
 #define PWR_CSR2_EWUP3			(1 << 10)
 
 /** EWUP2: Enable Wakeup pin for PA2 */
-#define PWR_CSR2_EWUP2			(1 << 19)
+#define PWR_CSR2_EWUP2			(1 << 9)
 
 /** EWUP1: Enable Wakeup pin for PA0 */
-#define PWR_CSR2_EWUP1			(1 << 18)
+#define PWR_CSR2_EWUP1			(1 << 8)
 
 /* Bits [7:6]: Reserved, must be kept at reset value. */
 
@@ -284,6 +284,15 @@ enum pwr_vos_scale {
 	PWR_SCALE3, /** <= 144MHz */
 };
 
+enum pwr_wakeup_pin {
+	PWR_WAKUP_PIN1,
+	PWR_WAKUP_PIN2,
+	PWR_WAKUP_PIN3,
+	PWR_WAKUP_PIN4,
+	PWR_WAKUP_PIN5,
+	PWR_WAKUP_PIN6,
+};
+
 BEGIN_DECLS
 
 void pwr_disable_backup_domain_write_protect(void);
@@ -296,11 +305,14 @@ void pwr_set_standby_mode(void);
 void pwr_set_stop_mode(void);
 void pwr_voltage_regulator_on_in_stop(void);
 void pwr_voltage_regulator_low_power_in_stop(void);
-void pwr_enable_wakeup_pin(void);
-void pwr_disable_wakeup_pin(void);
+void pwr_enable_wakeup_pin1(void);
+void pwr_disable_wakeup_pin1(void);
 bool pwr_voltage_high(void);
 bool pwr_get_standby_flag(void);
 bool pwr_get_wakeup_flag(void);
+
+void pwr_enable_wakeup_pin(enum pwr_wakeup_pin pin);
+void pwr_disable_wakeup_pin(enum pwr_wakeup_pin pin);
 
 void pwr_set_vos_scale(enum pwr_vos_scale scale);
 

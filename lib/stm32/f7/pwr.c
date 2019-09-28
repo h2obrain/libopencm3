@@ -54,7 +54,7 @@
 #define PWR_CR_PLS_MASK   PWR_CR1_PLS_MASK
 #define PWR_CR_PVDE       PWR_CR1_PVDE
 #define PWR_CR_CSBF       PWR_CR1_CSBF
-#define PWR_CR_CWUF       PWR_CR1_CWUF
+#define PWR_CR_CWUF       PWR_CR2_CWUPF1
 #define PWR_CR_PDDS       PWR_CR1_PDDS
 #define PWR_CR_LPDS       PWR_CR1_LPDS
 #define PWR_CSR_EWUP      PWR_CSR1_EIWUP
@@ -62,8 +62,39 @@
 #define PWR_CSR_SBF       PWR_CSR1_SBF
 #define PWR_CSR_WUF       PWR_CSR1_WUIF
 
+#define pwr_enable_wakeup_pin  pwr_enable_wakeup_pin1
+#define pwr_disable_wakeup_pin pwr_disable_wakeup_pin1
+
 #include "../common/pwr_common_v1.c"
 #include "../common/pwr_common_v2.c"
+
+#undef pwr_enable_wakeup_pin
+#undef pwr_disable_wakeup_pin
+
+/*---------------------------------------------------------------------------*/
+/** @brief Enable Wakeup Pin.
+
+The wakeup pin is used for waking the processor from standby mode.
+@param[in] pin Wakeup pin number
+*/
+
+void pwr_enable_wakeup_pin(enum pwr_wakeup_pin pin)
+{
+	PWR_CSR1 |= 1 << (8 + pin);
+}
+
+/*---------------------------------------------------------------------------*/
+/** @brief Release Wakeup Pin.
+
+The wakeup pin is used for general purpose I/O.
+@param[in] pin Wakeup pin number
+*/
+
+void pwr_disable_wakeup_pin(enum pwr_wakeup_pin pin)
+{
+	PWR_CSR1 |= 1 << (8 + pin);
+}
+
 
 void pwr_enable_overdrive(void)
 {
