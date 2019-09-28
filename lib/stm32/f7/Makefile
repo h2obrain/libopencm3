@@ -60,6 +60,7 @@ OBJS += pwr.o
 OBJS += quadspi_common_f47.o
 OBJS += rcc_common_all.o rcc_common_f47.o rcc.o
 OBJS += rng_common_v1.o
+OBJS += rtc_common_l1f024.o rtc_common_f47.o rtc.o
 OBJS += spi_common_all.o spi_common_v2.o
 OBJS += timer_common_all.o
 OBJS += usart_common_all.o usart_common_v2.o
