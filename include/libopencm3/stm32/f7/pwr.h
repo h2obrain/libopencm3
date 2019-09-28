@@ -286,7 +286,24 @@ enum pwr_vos_scale {
 
 BEGIN_DECLS
 
+void pwr_disable_backup_domain_write_protect(void);
+void pwr_enable_backup_domain_write_protect(void);
+void pwr_enable_power_voltage_detect(uint32_t pvd_level);
+void pwr_disable_power_voltage_detect(void);
+void pwr_clear_standby_flag(void);
+void pwr_clear_wakeup_flag(void);
+void pwr_set_standby_mode(void);
+void pwr_set_stop_mode(void);
+void pwr_voltage_regulator_on_in_stop(void);
+void pwr_voltage_regulator_low_power_in_stop(void);
+void pwr_enable_wakeup_pin(void);
+void pwr_disable_wakeup_pin(void);
+bool pwr_voltage_high(void);
+bool pwr_get_standby_flag(void);
+bool pwr_get_wakeup_flag(void);
+
 void pwr_set_vos_scale(enum pwr_vos_scale scale);
+
 void pwr_enable_overdrive(void);
 void pwr_disable_overdrive(void);
 

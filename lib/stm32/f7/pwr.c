@@ -40,18 +40,30 @@
 
 /**@{*/
 
-void pwr_set_vos_scale(enum pwr_vos_scale scale)
-{
-	PWR_CR1 &= ~PWR_CR1_VOS_MASK;
+/* Translate register definitions so we can use pwr_common_v1.c and
+ * pwr_common_v2.c
+ */
+#define PWR_CR            PWR_CR1
+#define PWR_CSR           PWR_CSR1
 
-	if (scale == PWR_SCALE1) {
-		PWR_CR1 |= PWR_CR1_VOS_SCALE_1;
-	} else if (scale == PWR_SCALE2) {
-		PWR_CR1 |= PWR_CR1_VOS_SCALE_2;
-	} else if (scale == PWR_SCALE3) {
-		PWR_CR1 |= PWR_CR1_VOS_SCALE_3;
-	}
-}
+#define PWR_CR_VOS_RANGE1 PWR_CR1_VOS_SCALE_1
+#define PWR_CR_VOS_RANGE2 PWR_CR1_VOS_SCALE_2
+#define PWR_CR_VOS_RANGE3 PWR_CR1_VOS_SCALE_3
+#define PWR_CR_VOS_MASK   PWR_CR1_VOS_MASK
+#define PWR_CR_DBP        PWR_CR1_DBP
+#define PWR_CR_PLS_MASK   PWR_CR1_PLS_MASK
+#define PWR_CR_PVDE       PWR_CR1_PVDE
+#define PWR_CR_CSBF       PWR_CR1_CSBF
+#define PWR_CR_CWUF       PWR_CR1_CWUF
+#define PWR_CR_PDDS       PWR_CR1_PDDS
+#define PWR_CR_LPDS       PWR_CR1_LPDS
+#define PWR_CSR_EWUP      PWR_CSR1_EIWUP
+#define PWR_CSR_PVDO      PWR_CSR1_PVDO
+#define PWR_CSR_SBF       PWR_CSR1_SBF
+#define PWR_CSR_WUF       PWR_CSR1_WUIF
+
+#include "../common/pwr_common_v1.c"
+#include "../common/pwr_common_v2.c"
 
 void pwr_enable_overdrive(void)
 {
