@@ -110,16 +110,16 @@ LGPL License Terms @ref lgpl_license
 @ingroup STM32F_pwr_defines
 
 @{*/
-#define PWR_CR1_PLS_2V0			(0x0 << PWR_CR_PLS_LSB)
-#define PWR_CR1_PLS_2V1			(0x1 << PWR_CR_PLS_LSB)
-#define PWR_CR1_PLS_2V3			(0x2 << PWR_CR_PLS_LSB)
-#define PWR_CR1_PLS_2V5			(0x3 << PWR_CR_PLS_LSB)
-#define PWR_CR1_PLS_2V6			(0x4 << PWR_CR_PLS_LSB)
-#define PWR_CR1_PLS_2V7			(0x5 << PWR_CR_PLS_LSB)
-#define PWR_CR1_PLS_2V8			(0x6 << PWR_CR_PLS_LSB)
-#define PWR_CR1_PLS_2V9			(0x7 << PWR_CR_PLS_LSB)
+#define PWR_CR1_PLS_2V0			(0x0 << PWR_CR1_PLS_LSB)
+#define PWR_CR1_PLS_2V1			(0x1 << PWR_CR1_PLS_LSB)
+#define PWR_CR1_PLS_2V3			(0x2 << PWR_CR1_PLS_LSB)
+#define PWR_CR1_PLS_2V5			(0x3 << PWR_CR1_PLS_LSB)
+#define PWR_CR1_PLS_2V6			(0x4 << PWR_CR1_PLS_LSB)
+#define PWR_CR1_PLS_2V7			(0x5 << PWR_CR1_PLS_LSB)
+#define PWR_CR1_PLS_2V8			(0x6 << PWR_CR1_PLS_LSB)
+#define PWR_CR1_PLS_2V9			(0x7 << PWR_CR1_PLS_LSB)
 /**@}*/
-#define PWR_CR1_PLS_MASK		(0x7 << PWR_CR_PLS_LSB)
+#define PWR_CR1_PLS_MASK		(0x7 << PWR_CR1_PLS_LSB)
 
 /** PVDE: Power voltage detector enable */
 #define PWR_CR1_PVDE			(1 << 4)
