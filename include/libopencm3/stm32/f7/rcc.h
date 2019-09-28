@@ -331,6 +331,7 @@
 #define RCC_APB2RSTR_SPI1RST			(1 << 12)
 #define RCC_APB2RSTR_SDMMC1RST			(1 << 11)
 #define RCC_APB2RSTR_ADCRST			(1 << 8)
+#define RCC_APB2RSTR_SDMMC2RST			(1 << 7)
 #define RCC_APB2RSTR_USART6RST			(1 << 5)
 #define RCC_APB2RSTR_USART1RST			(1 << 4)
 #define RCC_APB2RSTR_TIM8RST			(1 << 1)
@@ -436,6 +437,7 @@
 #define RCC_APB2ENR_ADC3EN			(1 << 10)
 #define RCC_APB2ENR_ADC2EN			(1 << 9)
 #define RCC_APB2ENR_ADC1EN			(1 << 8)
+#define RCC_APB2ENR_SDMMC2EN			(1 << 7)
 #define RCC_APB2ENR_USART6EN			(1 << 5)
 #define RCC_APB2ENR_USART1EN			(1 << 4)
 #define RCC_APB2ENR_TIM8EN			(1 << 1)
@@ -538,6 +540,7 @@
 #define RCC_APB2LPENR_ADC3LPEN			(1 << 10)
 #define RCC_APB2LPENR_ADC2LPEN			(1 << 9)
 #define RCC_APB2LPENR_ADC1LPEN			(1 << 8)
+#define RCC_APB2ENR_SDMMC2LPEN			(1 << 7)
 #define RCC_APB2LPENR_USART6LPEN		(1 << 5)
 #define RCC_APB2LPENR_USART1LPEN		(1 << 4)
 #define RCC_APB2LPENR_TIM8LPEN			(1 << 1)
@@ -792,6 +795,7 @@ enum rcc_periph_clken {
 	RCC_TIM8	= _REG_BIT(0x44, 1),
 	RCC_USART1	= _REG_BIT(0x44, 4),
 	RCC_USART6	= _REG_BIT(0x44, 5),
+	RCC_SDMMC2	= _REG_BIT(0x44, 7),
 	RCC_ADC1	= _REG_BIT(0x44, 8),
 	RCC_ADC2	= _REG_BIT(0x44, 9),
 	RCC_ADC3	= _REG_BIT(0x44, 10),
@@ -892,6 +896,7 @@ enum rcc_periph_clken {
 	SCC_TIM8	= _REG_BIT(0x64, 1),
 	SCC_USART1	= _REG_BIT(0x64, 4),
 	SCC_USART6	= _REG_BIT(0x64, 5),
+	SCC_SDMMC2	= _REG_BIT(0x64, 7),
 	SCC_ADC1	= _REG_BIT(0x64, 8),
 	SCC_ADC2	= _REG_BIT(0x64, 9),
 	SCC_ADC3	= _REG_BIT(0x64, 10),
@@ -980,6 +985,7 @@ enum rcc_periph_rst {
 	RST_TIM8	= _REG_BIT(0x24, 1),
 	RST_USART1	= _REG_BIT(0x24, 4),
 	RST_USART6	= _REG_BIT(0x24, 5),
+	RST_SDMMC2	= _REG_BIT(0x44, 7),
 	RST_ADC		= _REG_BIT(0x24, 8),
 	RST_SDMMC1	= _REG_BIT(0x24, 11),
 	RST_SPI1	= _REG_BIT(0x24, 12),
