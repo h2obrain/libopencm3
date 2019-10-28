@@ -68,6 +68,11 @@ bool dwt_enable_cycle_counter(void)
 		return false;		/* Not supported in implementation */
 	}
 
+#if defined(STM32F7)
+	/* get access to DWT */
+	DWT_LAR = 0xC5ACCE55;
+#endif
+
 	DWT_CYCCNT = 0;
 	DWT_CTRL |= DWT_CTRL_CYCCNTENA;
 	return true;
