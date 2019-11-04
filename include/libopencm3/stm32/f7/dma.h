@@ -41,5 +41,7 @@ LGPL License Terms @ref lgpl_license
 #define DMA_SxCR_CHSEL_11		(11 << DMA_SxCR_CHSEL_SHIFT)
 /**@}*/
 
+#undef DMA_SxCR_CHSEL_MASK
+#define DMA_SxCR_CHSEL_MASK		(15 << DMA_SxCR_CHSEL_SHIFT)
 
 #endif
