@@ -115,6 +115,13 @@ typedef enum {
 #define JPEG_CONFR1_NS_SHIFT           6
 #define JPEG_CONFR1_YSIZE_MASK         0x0000FFFF
 #define JPEG_CONFR1_YSIZE_SHIFT        16
+
+typedef enum {
+	JPEG_COLORSPACE_GRAYSCALE,
+	JPEG_COLORSPACE_YUV,
+	JPEG_COLORSPACE_RGB,
+	JPEG_COLORSPACE_CMYK
+} jpeg_confr1_colorspace_t;
 /**@}*/
 
 /** @defgroup jpeg_confr2_values JPEG_CONFR2 values
