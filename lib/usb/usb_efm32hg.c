@@ -99,7 +99,7 @@ static usbd_device *efm32hg_usbd_init(void)
 	OTG_FS_GINTSTS = OTG_GINTSTS_MMIS;
 
 	/* Full speed device. */
-	OTG_FS_DCFG |= OTG_DCFG_DSPD;
+	OTG_FS_DCFG |= OTG_DCFG_SPEED_FULL_INTERNAL_PHY;
 
 	/* Restart the PHY clock. */
 	OTG_FS_PCGCCTL = 0;
