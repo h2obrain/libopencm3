@@ -456,7 +456,7 @@ void dwc_poll(usbd_device *usbd_dev)
 			dwc_flush_txfifo(usbd_dev, ep);
 		}
 
-		/* Save packet size for stm32f107_ep_read_packet(). */
+		/* Save packet size for dwc_ep_read_packet(). */
 		usbd_dev->rxbcnt = (rxstsp & OTG_GRXSTSP_BCNT_MASK) >> 4;
 
 		if (type == USB_TRANSACTION_SETUP) {
