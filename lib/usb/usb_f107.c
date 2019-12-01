@@ -54,7 +54,11 @@ const struct _usbd_driver stm32f107_usb_driver = {
 static usbd_device *stm32f107_usbd_init(void)
 {
 	rcc_periph_clock_enable(RCC_OTGFS);
+	OTG_FS_GINTSTS = OTG_GINTSTS_MMIS;
+
 	OTG_FS_GUSBCFG |= OTG_GUSBCFG_PHYSEL;
+	/* Enable VBUS sensing in device mode and power down the PHY. */
+	OTG_FS_GCCFG |= OTG_GCCFG_VBUSBSEN | OTG_GCCFG_PWRDWN;
 
 	/* Wait for AHB idle. */
 	while (!(OTG_FS_GRSTCTL & OTG_GRSTCTL_AHBIDL));
@@ -80,7 +84,7 @@ static usbd_device *stm32f107_usbd_init(void)
 	OTG_FS_GINTSTS = OTG_GINTSTS_MMIS;
 
 	/* Full speed device. */
-	OTG_FS_DCFG |= OTG_DCFG_DSPD;
+	OTG_FS_DCFG |= OTG_DCFG_SPEED_FULL_INTERNAL_PHY;
 
 	/* Restart the PHY clock. */
 	OTG_FS_PCGCCTL = 0;
