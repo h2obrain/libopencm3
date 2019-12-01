@@ -147,11 +147,12 @@
 #define OTG_GINTSTS_SRQINT		(1 << 30)
 #define OTG_GINTSTS_DISCINT		(1 << 29)
 #define OTG_GINTSTS_CIDSCHG		(1 << 28)
-/* Bit 27 - Reserved */
+#define OTG_GINTSTS_LPMINT		(1 << 27) /* HS only */
 #define OTG_GINTSTS_PTXFE		(1 << 26)
 #define OTG_GINTSTS_HCINT		(1 << 25)
 #define OTG_GINTSTS_HPRTINT		(1 << 24)
-/* Bits 23:22 - Reserved */
+#define OTG_GINTSTS_RSTDET		(1 << 23) /* FS only */
+#define OTG_GINTSTS_DATAFSUSP	(1 << 22) /* HS only */
 #define OTG_GINTSTS_IPXFR		(1 << 21)
 #define OTG_GINTSTS_INCOMPISOOUT	(1 << 21)
 #define OTG_GINTSTS_IISOIXFR		(1 << 20)

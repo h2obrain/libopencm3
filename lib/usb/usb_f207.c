@@ -50,17 +50,6 @@ const struct _usbd_driver stm32f207_usb_driver = {
 	.rx_fifo_size = RX_FIFO_SIZE,
 };
 
-
-#ifndef USE_ULPI
-#define USE_ULPI
-#endif
-#ifndef USE_ULPI_FULL_SPEED
-//#define USE_ULPI_FULL_SPEED
-#endif
-#ifndef USE_ULPI_EXTERNAL_VBUS
-#define USE_ULPI_EXTERNAL_VBUS
-#endif
-
 #define CYCLES_PER_LOOP 3
 static inline void wait_cycles( uint32_t n ) {
     uint32_t l = n/CYCLES_PER_LOOP;
@@ -74,8 +63,6 @@ static inline void msleep_loop(uint32_t ms) {
 /** Initialize the USB device controller hardware of the STM32. */
 static usbd_device *stm32f207_usbd_init(void)
 {
-//	OTG_HS_GINTSTS = OTG_GINTSTS_MMIS;
-
 	rcc_periph_clock_enable(RCC_OTGHS);
 	OTG_HS_GINTSTS = OTG_GINTSTS_MMIS;
 
@@ -89,6 +76,7 @@ static usbd_device *stm32f207_usbd_init(void)
 	/* Do core soft reset. */
 	OTG_HS_GRSTCTL |= OTG_GRSTCTL_CSRST;
 	while (OTG_HS_GRSTCTL & OTG_GRSTCTL_CSRST);
+	wait_cycles(3);
 
 	/* Force peripheral only mode and set turnaround time to maximum */
 	OTG_HS_GUSBCFG |= OTG_GUSBCFG_FDMOD | OTG_GUSBCFG_TRDT_MASK; // | (0x5<<10);
@@ -98,13 +86,18 @@ static usbd_device *stm32f207_usbd_init(void)
 #else
 	rcc_periph_clock_enable(RCC_OTGHSULPI);
 
-	/* Power down the PHY. */
-	OTG_HS_GCCFG   &= ~(OTG_GCCFG_PWRDWN);
+	/* Power up the PHY. */
+	OTG_HS_GCCFG   &= ~OTG_GCCFG_PWRDWN;
+	/* */
 	OTG_HS_GUSBCFG &= ~(OTG_GUSBCFG_TSDPS | OTG_GUSBCFG_ULPIFSLS | OTG_GUSBCFG_PHYSEL);
+	OTG_HS_GUSBCFG &= ~(OTG_GUSBCFG_ULPIEVBUSI | OTG_GUSBCFG_ULPIEVBUSD);
+	/* Enable VBUS indicator */
+	OTG_HS_GUSBCFG |= OTG_GUSBCFG_ULPIEVBUSI;
 	/* Enable VBUS sensing in device mode and power down the PHY. */
-	OTG_HS_GUSBCFG &= ~(OTG_GUSBCFG_ULPIEVBUSD | OTG_GUSBCFG_ULPIEVBUSI);
 #ifdef USE_ULPI_EXTERNAL_VBUS
 	OTG_HS_GUSBCFG |= OTG_GUSBCFG_ULPIEVBUSD;
+#else
+	OTG_HS_GUSBCFG &= ~OTG_GUSBCFG_ULPIEVBUSD;
 #endif
 	/* Wait for AHB idle. */
 	while (!(OTG_HS_GRSTCTL & OTG_GRSTCTL_AHBIDL));
@@ -112,8 +105,7 @@ static usbd_device *stm32f207_usbd_init(void)
 	OTG_HS_GRSTCTL |= OTG_GRSTCTL_CSRST;
 	while (OTG_HS_GRSTCTL & OTG_GRSTCTL_CSRST);
 
-	// sleep ~50ms
-	msleep_loop(50);
+	wait_cycles(10);
 
 	/* Force peripheral only mode and set turnaround time to maximum */
 	OTG_HS_GUSBCFG |= OTG_GUSBCFG_FDMOD | OTG_GUSBCFG_TRDT_MASK; // | (0x5<<10);
@@ -155,6 +147,7 @@ static usbd_device *stm32f207_usbd_init(void)
 			 OTG_GINTMSK_USBSUSPM |
 			 OTG_GINTMSK_WUIM |
 			 OTG_GINTMSK_OTGINT;
+
 	OTG_HS_DAINTMSK = 0xFFFF;
 	OTG_HS_DIEPMSK = OTG_DIEPMSK_XFRCM;
 
