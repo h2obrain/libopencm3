@@ -38,8 +38,8 @@ LGPL License Terms @ref lgpl_license
 #ifndef __USB_PRIVATE_H
 #define __USB_PRIVATE_H
 
-#define MAX_USER_CONTROL_CALLBACK	4
-#define MAX_USER_SET_CONFIG_CALLBACK	4
+#define MAX_USER_CONTROL_CALLBACK	16//4
+#define MAX_USER_SET_CONFIG_CALLBACK	16//4
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -83,7 +83,7 @@ struct _usbd_device {
 		uint8_t type_mask;
 	} user_control_callback[MAX_USER_CONTROL_CALLBACK];
 
-	usbd_endpoint_callback user_callback_ctr[8][3];
+	usbd_endpoint_callback user_callback_ctr[32][3];//[8][3];
 
 	/* User callback function for some standard USB function hooks */
 	usbd_set_config_callback user_callback_set_config[MAX_USER_SET_CONFIG_CALLBACK];
@@ -100,12 +100,12 @@ struct _usbd_device {
 
 	uint16_t fifo_mem_top;
 	uint16_t fifo_mem_top_ep0;
-	uint8_t force_nak[4];
+	uint8_t force_nak[16]; //4];
 	/*
 	 * We keep a backup copy of the out endpoint size registers to restore
 	 * them after a transaction.
 	 */
-	uint32_t doeptsiz[4];
+	uint32_t doeptsiz[16]; //4];
 	/*
 	 * Received packet size for each endpoint. This is assigned in
 	 * stm32f107_poll() which reads the packet status push register GRXSTSP

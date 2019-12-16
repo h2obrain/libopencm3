@@ -92,7 +92,7 @@ static usbd_device *stm32f207_usbd_init(void)
 	OTG_HS_GUSBCFG &= ~(OTG_GUSBCFG_TSDPS | OTG_GUSBCFG_ULPIFSLS | OTG_GUSBCFG_PHYSEL);
 	OTG_HS_GUSBCFG &= ~(OTG_GUSBCFG_ULPIEVBUSI | OTG_GUSBCFG_ULPIEVBUSD);
 	/* Enable VBUS indicator */
-	OTG_HS_GUSBCFG |= OTG_GUSBCFG_ULPIEVBUSI;
+//	OTG_HS_GUSBCFG |= OTG_GUSBCFG_ULPIEVBUSI;
 	/* Enable VBUS sensing in device mode and power down the PHY. */
 #ifdef USE_ULPI_EXTERNAL_VBUS
 	OTG_HS_GUSBCFG |= OTG_GUSBCFG_ULPIEVBUSD;
@@ -116,12 +116,13 @@ static usbd_device *stm32f207_usbd_init(void)
 	/* Enable VBUS sensing */
 	OTG_HS_GCCFG |= OTG_GCCFG_VBUSBSEN;
 //	OTG_HS_GCCFG |= OTG_GCCFG_NOVBUSSENS; // disable bus sensing
+	OTG_HS_GCCFG |= OTG_GCCFG_VBDEN;
 
 	/* Restart the PHY clock. */
 	OTG_HS_PCGCCTL = 0;
 
 	/* Set frame interval to 80 */
-	OTG_HS_DCFG |= 0;
+//	OTG_HS_DCFG |= 0;
 
 	/* Full speed device. */
 #ifdef USE_ULPI_FULL_SPEED
@@ -143,17 +144,21 @@ static usbd_device *stm32f207_usbd_init(void)
 	OTG_HS_GINTMSK =
 			 OTG_GINTMSK_ENUMDNEM |
 			 OTG_GINTMSK_RXFLVLM |
+//			 OTG_GINTSTS_OEPINT |
 			 OTG_GINTMSK_IEPINT |
 			 OTG_GINTMSK_USBSUSPM |
 			 OTG_GINTMSK_WUIM |
-			 OTG_GINTMSK_OTGINT;
+			 OTG_GINTMSK_OTGINT; // | OTG_GINTMSK_SRQIM;
 
 	OTG_HS_DAINTMSK = 0xFFFF;
 	OTG_HS_DIEPMSK = OTG_DIEPMSK_XFRCM;
 
+	// disconnect
+	OTG_HS_DCTL |= OTG_DCTL_SDIS;
+	msleep_loop(3);
+	// connect
 	OTG_HS_DCTL &= ~OTG_DCTL_SDIS;
-	// sleep >>3ms
-	msleep_loop(5);
+	msleep_loop(3);
 
 	return &usbd_dev;
 }

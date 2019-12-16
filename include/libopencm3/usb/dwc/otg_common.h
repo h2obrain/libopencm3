@@ -333,27 +333,39 @@
 #define OTG_DOEPCTL0_MPSIZ_8		(0x3 << 0)
 
 /* OTG Device IN Endpoint Interrupt Register (OTG_DIEPINTx) */
-/* Bits 31:8 - Reserved */
+/* Bits 31:14 - Reserved */
+#define OTG_DIEPINTX_NAK		(1 << 13) /* todo F7-only? */
+/* Bit 12 - Reserved */
+#define OTG_DIEPINTX_PKTDRPSTS	(1 << 11) /* todo F7-only? */
+/* Bits 10:9 - Reserved */
+#define OTG_DIEPINTX_TXFIFOUDRN	(1 << 8) /* todo F7-only? */
 #define OTG_DIEPINTX_TXFE		(1 << 7)
 #define OTG_DIEPINTX_INEPNE		(1 << 6)
 /* Bit 5 - Reserved */
 #define OTG_DIEPINTX_ITTXFE		(1 << 4)
 #define OTG_DIEPINTX_TOC		(1 << 3)
-/* Bit 2 - Reserved */
+#define OTG_DIEPINTX_AHBERR		(1 << 2) /* HS-only  todo F7-only? */
 #define OTG_DIEPINTX_EPDISD		(1 << 1)
 #define OTG_DIEPINTX_XFRC		(1 << 0)
 
-/* OTG Device IN Endpoint Interrupt Register (OTG_DOEPINTx) */
-/* Bits 31:7 - Reserved */
-#define OTG_DOEPINTX_B2BSTUP		(1 << 6)
-/* Bit 5 - Reserved */
+/* OTG Device OUT Endpoint Interrupt Register (OTG_DOEPINTx) */
+/* Bits 31:16 - Reserved */
+#define OTG_DOEPINTX_STPKTRX	(1 << 15) /* HS-only  todo F7-only? */
+#define OTG_DOEPINTX_NAK		(1 << 14) /* todo F7-only? */
+#define OTG_DOEPINTX_NYET		(1 << 13) /* todo F7-only? */
+#define OTG_DOEPINTX_BERR		(1 << 12) /* todo F7-only? */
+/* Bits 11:9 - Reserved */
+#define OTG_DOEPINTX_OUTPKTERR	(1 << 8) /* todo F7-only? */
+/* Bit 7 - Reserved */
+#define OTG_DOEPINTX_B2BSTUP		(1 << 6) /* HS-only */
+#define OTG_DOEPINTX_STSPHSRX	(1 << 5) /* todo F7-only? */
 #define OTG_DOEPINTX_OTEPDIS		(1 << 4)
 #define OTG_DOEPINTX_STUP		(1 << 3)
-/* Bit 2 - Reserved */
+#define OTG_DOEPINTX_AHBERR		(1 << 2) /* HS-only  todo F7-only? */
 #define OTG_DOEPINTX_EPDISD		(1 << 1)
 #define OTG_DOEPINTX_XFRC		(1 << 0)
 
-/* OTG Device OUT Endpoint 0 Transfer Size Register (OTG_DOEPTSIZ0) */
+/* OTG Device IN Endpoint 0 Transfer Size Register (OTG_DIEPTSIZ0) */
 /* Bit 31 - Reserved */
 #define OTG_DIEPSIZ0_STUPCNT_1		(0x1 << 29)
 #define OTG_DIEPSIZ0_STUPCNT_2		(0x2 << 29)
