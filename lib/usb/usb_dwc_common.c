@@ -40,6 +40,24 @@
 //	#define USB_OTG_DRIVER ((dev_base_address==USB_OTG_FS_BASE)?0:1)
 //#endif
 
+#if USB_OTG_DRIVER
+ #if defined(STM32F7)
+  #define NUM_ENDPOINTS() 9
+ #elif defined(STM32F4)
+  #define NUM_ENDPOINTS() 6
+ #else
+  #error "Architecture not implemented!"
+ #endif
+#else
+ #if defined(STM32F7)
+  #define NUM_ENDPOINTS() (1+5)
+ #elif defined(STM32F4)
+  #define NUM_ENDPOINTS() (1+3)
+ #else
+  #error "Architecture not implemented!"
+ #endif
+#endif
+
 #if defined(ASSUME_64B_MAXPACKETSIZE)
 #define EPx_WMAXPACKETSIZE(epX) 64
 #else
@@ -82,16 +100,25 @@ void dwc_ep_setup(usbd_device *usbd_dev, uint8_t addr, uint8_t type,
 		fifo_word_len = 16;
 	}
 	if (addr == 0) { /* For the default control endpoint */
+		uint32_t in_mpsiz;
+
+#if USB_OTG_DRIVER==0 // FS
 		/* Configure IN part. */
 		if (max_size >= 64) {
-			REBASE(OTG_DIEPCTL0) = OTG_DIEPCTL0_MPSIZ_64;
+			in_mpsiz = 64 << 0;
 		} else if (max_size >= 32) {
-			REBASE(OTG_DIEPCTL0) = OTG_DIEPCTL0_MPSIZ_32;
+			in_mpsiz = 32 << 0;
 		} else if (max_size >= 16) {
-			REBASE(OTG_DIEPCTL0) = OTG_DIEPCTL0_MPSIZ_16;
+			in_mpsiz = 16 << 0;
 		} else {
-			REBASE(OTG_DIEPCTL0) = OTG_DIEPCTL0_MPSIZ_8;
+			in_mpsiz = 8 << 0;
 		}
+#else
+		in_mpsiz = max_size;
+#endif
+
+		/* Configure IN part. */
+		REBASE(OTG_DIEPCTL(0)) = in_mpsiz;
 
 		REBASE(OTG_DIEPTSIZ0) =
 			(max_size & OTG_DIEPSIZ0_XFRSIZ_MASK);
@@ -119,11 +146,8 @@ void dwc_ep_setup(usbd_device *usbd_dev, uint8_t addr, uint8_t type,
 					     usbd_dev->fifo_mem_top;
 		usbd_dev->fifo_mem_top += fifo_word_len;
 
-		/*  officially (reference manual rev. 8 page 1449) there are only 4
-		 *  of those registers for otg-hs.. (i'm using 6 and it's working)
-		 */
 		REBASE(OTG_DIEPTSIZ(addr)) = 0;
-				//(max_size & OTG_FS_DIEPSIZ0_XFRSIZ_MASK);
+//		REBASE(OTG_DIEPTSIZ(addr)) = (max_size & OTG_DIEPSIZ0_XFRSIZ_MASK);
 		/*
 		 * setting the commented flag results in the
 		 * multiple packets send not working
@@ -166,14 +190,64 @@ void dwc_endpoints_reset(usbd_device *usbd_dev)
 	/* The core resets the endpoints automatically on reset. */
 	usbd_dev->fifo_mem_top = usbd_dev->fifo_mem_top_ep0;
 
-	/* Disable any currently active endpoints */
-	for (i = 1; i < 4+(USB_OTG_DRIVER<<1); i++) {
+	/* Disable any currently active endpoints and reset interrupts */
+	for (i = 1; i < NUM_ENDPOINTS(); i++) {
 		if (REBASE(OTG_DOEPCTL(i)) & OTG_DOEPCTL0_EPENA) {
 			REBASE(OTG_DOEPCTL(i)) |= OTG_DOEPCTL0_EPDIS;
 		}
 		if (REBASE(OTG_DIEPCTL(i)) & OTG_DIEPCTL0_EPENA) {
 			REBASE(OTG_DIEPCTL(i)) |= OTG_DIEPCTL0_EPDIS;
 		}
+
+	/* Reset all interrupts */
+#if 0
+#if USB_OTG_DRIVER==0 // FS
+		REBASE(OTG_DOEPINT(i)) =
+				OTG_DOEPINTX_NAK
+			  | OTG_DOEPINTX_NYET
+			  | OTG_DOEPINTX_BERR
+			  | OTG_DOEPINTX_OUTPKTERR
+			  | OTG_DOEPINTX_B2BSTUP
+			  | OTG_DOEPINTX_STSPHSRX
+			  | OTG_DOEPINTX_OTEPDIS
+			  | OTG_DOEPINTX_STUP
+			  | OTG_DOEPINTX_EPDISD
+			  | OTG_DOEPINTX_XFRC;
+
+		REBASE(OTG_DIEPINT(i)) =
+				OTG_DIEPINTX_NAK
+			  | OTG_DIEPINTX_PKTDRPSTS
+			  | OTG_DIEPINTX_TXFIFOUDRN
+			  | OTG_DIEPINTX_ITTXFE
+			  | OTG_DIEPINTX_TOC
+			  | OTG_DIEPINTX_EPDISD
+			  | OTG_DIEPINTX_XFRC;
+#else
+		REBASE(OTG_DOEPINT(i)) =
+				OTG_DOEPINTX_STPKTRX
+			  | OTG_DOEPINTX_NAK
+			  | OTG_DOEPINTX_NYET
+			  | OTG_DOEPINTX_BERR
+			  | OTG_DOEPINTX_OUTPKTERR
+			  | OTG_DOEPINTX_B2BSTUP
+			  | OTG_DOEPINTX_STSPHSRX
+			  | OTG_DOEPINTX_OTEPDIS
+			  | OTG_DOEPINTX_STUP
+			  | OTG_DOEPINTX_AHBERR
+			  | OTG_DOEPINTX_EPDISD
+			  | OTG_DOEPINTX_XFRC;
+
+		REBASE(OTG_DIEPINT(i)) =
+				OTG_DIEPINTX_NAK
+			  | OTG_DIEPINTX_PKTDRPSTS
+			  | OTG_DIEPINTX_TXFIFOUDRN
+			  | OTG_DIEPINTX_ITTXFE
+			  | OTG_DIEPINTX_TOC
+			  | OTG_DIEPINTX_AHBERR
+			  | OTG_DIEPINTX_EPDISD
+			  | OTG_DIEPINTX_XFRC;
+#endif
+#endif
 	}
 
 	/* Flush all tx/rx fifos */
@@ -399,7 +473,7 @@ void dwc_poll(usbd_device *usbd_dev)
 	 * There is no global interrupt flag for transmit complete.
 	 * The XFRC bit must be checked in each OTG_DIEPINT(x).
 	 */
-	for (i = 0; i < 4+(USB_OTG_DRIVER<<1); i++) { /* Iterate over endpoints.
+	for (i = 0; i < NUM_ENDPOINTS(); i++) { /* Iterate over endpoints.
 					There are actually 8 DIEPINT registers,
 					but only 6 FIFO buffers in OTG_HS
 					OTG_FS has only 4 DIEPINT registers */
@@ -418,6 +492,8 @@ void dwc_poll(usbd_device *usbd_dev)
 
 	/* Note: RX and TX handled differently in this device. */
 	if (intsts & OTG_GINTSTS_RXFLVL) {
+//	if (intsts & OTG_GINTSTS_OEPINT) {
+
 		/* Receive FIFO non-empty. */
 		uint32_t rxstsp = REBASE(OTG_GRXSTSP);
 		uint32_t pktsts = rxstsp & OTG_GRXSTSP_PKTSTS_MASK;
