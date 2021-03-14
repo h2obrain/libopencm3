@@ -36,7 +36,7 @@
 #ifndef LIBOPENCM3_RCC_H
 #define LIBOPENCM3_RCC_H
 
-#include <libopencm3/stm32/f7/pwr.h>
+#include <libopencm3/stm32/pwr.h>
 
 /**@{*/
 
@@ -90,6 +90,8 @@
 
 /* --- RCC_PLLCFGR values -------------------------------------------------- */
 
+#define RCC_PLLCFGR_PLLR_MASK			0x7
+#define RCC_PLLCFGR_PLLR_SHIFT			28
 #define RCC_PLLCFGR_PLLQ_MASK			0xf
 #define RCC_PLLCFGR_PLLQ_SHIFT			24
 #define RCC_PLLCFGR_PLLSRC			(1 << 22)
@@ -312,6 +314,9 @@
 
 /** @defgroup rcc_apb2rstr_rst RCC_APB2RSTR reset values
 @{*/
+#define RCC_APB2RSTR_MDIORST			(1 << 30)
+#define RCC_APB2RSTR_DFSDM1RST			(1 << 29)
+#define RCC_APB2RSTR_DSIRST			(1 << 27)
 #define RCC_APB2RSTR_LTDCRST			(1 << 26)
 #define RCC_APB2RSTR_SAI2RST			(1 << 23)
 #define RCC_APB2RSTR_SAI1RST			(1 << 22)
@@ -411,6 +416,9 @@
 
 /** @defgroup rcc_apb2enr_en RCC_APB2ENR enable values
 @{*/
+#define RCC_APB2ENR_MDIOEN			(1 << 30)
+#define RCC_APB2ENR_DFSDM1EN			(1 << 29)
+#define RCC_APB2ENR_DSIEN			(1 << 27)
 #define RCC_APB2ENR_LTDCEN			(1 << 26)
 #define RCC_APB2ENR_SAI2EN			(1 << 23)
 #define RCC_APB2ENR_SAI1EN			(1 << 22)
@@ -509,6 +517,9 @@
 
 /* --- RCC_APB2LPENR values ------------------------------------------------- */
 
+#define RCC_APB2LPENR_MDIOLPEN			(1 << 30)
+#define RCC_APB2LPENR_DFSDM1LPEN		(1 << 29)
+#define RCC_APB2LPENR_DSILPEN			(1 << 27)
 #define RCC_APB2LPENR_LTDCLPEN			(1 << 26)
 #define RCC_APB2LPENR_SAI2LPEN			(1 << 23)
 #define RCC_APB2LPENR_SAI1LPEN			(1 << 22)
@@ -576,9 +587,8 @@
 
 /* --- RCC_PLLI2SCFGR values ----------------------------------------------- */
 
-/* RCC_PLLI2SCFGR[30:28]: PLLI2SR */
-#define RCC_PLLI2SCFGR_PLLI2S_MASK		0x7
-#define RCC_PLLI2SCFGR_PLLI2S_SHIFT		28
+#define RCC_PLLI2SCFGR_PLLI2SR_MASK		0x7
+#define RCC_PLLI2SCFGR_PLLI2SR_SHIFT		28
 #define RCC_PLLI2SCFGR_PLLI2SQ_MASK		0xf
 #define RCC_PLLI2SCFGR_PLLI2SQ_SHIFT		24
 #define RCC_PLLI2SCFGR_PLLI2SP_MASK		0x3
@@ -594,11 +604,17 @@
 #define RCC_PLLSAICFGR_PLLSAIQ_SHIFT		24
 #define RCC_PLLSAICFGR_PLLSAIP_MASK		0x3
 #define RCC_PLLSAICFGR_PLLSAIP_SHIFT		16
+#define RCC_PLLSAICFGR_PLLSAIP_DIV2		0x0
+#define RCC_PLLSAICFGR_PLLSAIP_DIV4		0x1
+#define RCC_PLLSAICFGR_PLLSAIP_DIV6		0x2
+#define RCC_PLLSAICFGR_PLLSAIP_DIV8		0x3
 #define RCC_PLLSAICFGR_PLLSAIN_MASK		0x1FF
 #define RCC_PLLSAICFGR_PLLSAIN_SHIFT		6
 
 /* --- RCC_DCKCFGR1 values -------------------------------------------------- */
 
+#define RCC_DCKCFGR1_ADFSDM1SEL			(1<<26)
+#define RCC_DCKCFGR1_DFSDM1SEL			(1<<25)
 #define RCC_DCKCFGR1_TIMPRE			(1<<24)
 #define RCC_DCKCFGR1_SAI2SEL_MASK		0x3
 #define RCC_DCKCFGR1_SAI2SEL_SHIFT		22
@@ -617,6 +633,9 @@
 
 /* --- RCC_DCKCFGR2 values -------------------------------------------------- */
 
+#define RCC_DCKCFGR2_DSISEL			(1<<30)
+#define RCC_DCKCFGR2_SDMMC2SEL			(1<<29)
+#define RCC_DCKCFGR2_SDMMC1SEL			(1<<28)
 #define RCC_DCKCFGR2_SDMMCSEL			(1<<28)
 #define RCC_DCKCFGR2_CK48MSEL			(1<<27)
 #define RCC_DCKCFGR2_CECSEL			(1<<26)
@@ -673,6 +692,7 @@ struct rcc_clock_scale {
 	uint16_t plln;
 	uint8_t pllp;
 	uint8_t pllq;
+	uint8_t pllr;
 	uint32_t flash_waitstates;
 	uint8_t hpre;
 	uint8_t ppre1;
@@ -688,6 +708,8 @@ extern const struct rcc_clock_scale rcc_3v3[RCC_CLOCK_3V3_END];
 
 enum rcc_osc {
 	RCC_PLL,
+	RCC_PLLSAI,
+	RCC_PLLI2S,
 	RCC_HSE,
 	RCC_HSI,
 	RCC_LSE,
@@ -784,6 +806,9 @@ enum rcc_periph_clken {
 	RCC_SAI1EN	= _REG_BIT(0x44, 22),
 	RCC_SAI2EN	= _REG_BIT(0x44, 23),
 	RCC_LTDC	= _REG_BIT(0x44, 26),
+	RCC_DSI		= _REG_BIT(0x44, 27),
+	RCC_DFSDM1	= _REG_BIT(0x44, 29),
+	RCC_MDIO	= _REG_BIT(0x44, 30),
 
 
 	/* BDCR */
@@ -880,6 +905,9 @@ enum rcc_periph_clken {
 	SCC_SAI1	= _REG_BIT(0x64, 22),
 	SCC_SAI2	= _REG_BIT(0x64, 23),
 	SCC_LTDC	= _REG_BIT(0x64, 26),
+	SCC_DSI		= _REG_BIT(0x64, 27),
+	SCC_DFSDM1	= _REG_BIT(0x64, 29),
+	SCC_MDIO	= _REG_BIT(0x64, 30),
 };
 
 enum rcc_periph_rst {
@@ -962,6 +990,9 @@ enum rcc_periph_rst {
 	RST_SAI1RST	= _REG_BIT(0x24, 22),
 	RST_SAI2RST	= _REG_BIT(0x24, 23),
 	RST_LTDC	= _REG_BIT(0x24, 26),
+	RST_DSI		= _REG_BIT(0x24, 27),
+	RST_DFSDM1	= _REG_BIT(0x24, 29),
+	RST_MDIO	= _REG_BIT(0x24, 30),
 };
 
 #undef _REG_BIT
@@ -980,6 +1011,12 @@ void rcc_osc_on(enum rcc_osc osc);
 void rcc_osc_off(enum rcc_osc osc);
 void rcc_css_enable(void);
 void rcc_css_disable(void);
+void rcc_pllsai_enable(void);
+void rcc_pllsai_disable(void);
+bool rcc_pllsai_ready(void);
+void rcc_plli2s_config(uint16_t n, uint8_t r);
+void rcc_pllsai_config(uint16_t n, uint16_t p, uint16_t q, uint16_t r);
+void rcc_pllsai_postscalers(uint8_t q, uint8_t r);
 void rcc_set_sysclk_source(uint32_t clk);
 void rcc_set_pll_source(uint32_t pllsrc);
 void rcc_set_ppre2(uint32_t ppre2);
@@ -987,9 +1024,9 @@ void rcc_set_ppre1(uint32_t ppre1);
 void rcc_set_hpre(uint32_t hpre);
 void rcc_set_rtcpre(uint32_t rtcpre);
 void rcc_set_main_pll_hsi(uint32_t pllm, uint32_t plln, uint32_t pllp,
-			  uint32_t pllq);
+			  uint32_t pllq, uint32_t pllr);
 void rcc_set_main_pll_hse(uint32_t pllm, uint32_t plln, uint32_t pllp,
-			  uint32_t pllq);
+			  uint32_t pllq, uint32_t pllr);
 uint32_t rcc_system_clock_source(void);
 void rcc_clock_setup_hse(const struct rcc_clock_scale *clock, uint32_t hse_mhz);
 void rcc_clock_setup_hsi(const struct rcc_clock_scale *clock);
