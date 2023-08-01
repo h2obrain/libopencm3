@@ -248,9 +248,9 @@ uint32_t rcc_get_usart_clk_freq(uint32_t usart)
 	if (usart == USART1_BASE) {
 		return rcc_usart_i2c_clksel_freq(rcc_apb2_frequency, RCC_DCKCFGR2_UART1SEL_SHIFT);
 	} else if (usart == USART2_BASE) {
-		return rcc_usart_i2c_clksel_freq(rcc_apb1_frequency, RCC_DCKCFGR2_USART2SEL_SHIFT);
+		return rcc_usart_i2c_clksel_freq(rcc_apb1_frequency, RCC_DCKCFGR2_UART2SEL_SHIFT);
 	} else if (usart == USART3_BASE) {
-		return rcc_usart_i2c_clksel_freq(rcc_apb1_frequency, RCC_DCKCFGR2_USART3SEL_SHIFT);
+		return rcc_usart_i2c_clksel_freq(rcc_apb1_frequency, RCC_DCKCFGR2_UART3SEL_SHIFT);
 	} else if (usart == UART4_BASE) {
 		return rcc_usart_i2c_clksel_freq(rcc_apb1_frequency, RCC_DCKCFGR2_UART4SEL_SHIFT);
 	} else if (usart == UART5_BASE) {
